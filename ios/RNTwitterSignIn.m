@@ -49,7 +49,7 @@ RCT_EXPORT_METHOD(logIn: (RCTPromiseResolveBlock)resolve
         }];
     }
     @catch (NSException *exception){
-        reject(@"Error", @"Twitter signin exception");
+        reject(@"Error", @"Twitter signin exception", NULL);
     }
 }
 
