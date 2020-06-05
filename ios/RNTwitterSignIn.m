@@ -18,7 +18,7 @@
     return dispatch_get_main_queue();
 }
 
-BOOL authNotResolved = true;
+// BOOL authNotResolved = true;
 
 RCT_EXPORT_MODULE();
 
@@ -30,26 +30,27 @@ RCT_EXPORT_METHOD(init: (NSString *)consumerKey consumerSecret:(NSString *)consu
 RCT_EXPORT_METHOD(logIn: (RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
 {
-    [[Twitter sharedInstance] logInWithCompletion:^(TWTRSession * _Nullable session, NSError * _Nullable error) {
-        if (session) {
-            TWTRAPIClient *client = [TWTRAPIClient clientWithCurrentUser];
-
-            [client requestEmailForCurrentUser:^(NSString *email, NSError *error) {
-                NSString *requestedEmail = (email) ? email : @"";
-                NSDictionary *body = @{@"authToken": session.authToken,
-                                       @"authTokenSecret": session.authTokenSecret,
-                                       @"userID":session.userID,
-                                       @"email": requestedEmail,
-                                       @"userName":session.userName};
-                if(authNotResolved){
+    @try{
+        [[Twitter sharedInstance] logInWithCompletion:^(TWTRSession * _Nullable session, NSError * _Nullable error) {
+            if (session) {
+                TWTRAPIClient *client = [TWTRAPIClient clientWithCurrentUser];
+                [client requestEmailForCurrentUser:^(NSString *email, NSError *error) {
+                    NSString *requestedEmail = (email) ? email : @"";
+                    NSDictionary *body = @{@"authToken": session.authToken,
+                                           @"authTokenSecret": session.authTokenSecret,
+                                           @"userID":session.userID,
+                                           @"email": requestedEmail,
+                                           @"userName":session.userName};
                     resolve(body);
-//                     authNotResolved = false;
-                }
-            }];
-        } else {
-            reject(@"Error", @"Twitter signin error", error);
-        }
-    }];
+                }];
+            } else {
+                reject(@"Error", @"Twitter signin error", error);
+            }
+        }];
+    }
+    @catch (NSException *exception){
+        reject(@"Error", @"Twitter signin exception");
+    }
 }
 
 RCT_EXPORT_METHOD(logOut)
